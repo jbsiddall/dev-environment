@@ -2,6 +2,7 @@ call plug#begin()
 Plug 'https://github.com/scrooloose/nerdtree'
 Plug 'https://github.com/gosukiwi/vim-atom-dark'
 Plug 'https://github.com/kien/ctrlp.vim'
+Plug 'nvie/vim-flake8'
 Plug 'rbgrouleff/bclose.vim'
 Plug 'francoiscabrol/ranger.vim'
 call plug#end()
@@ -59,8 +60,21 @@ endfunction
 :autocmd FileType javascript call SetJavascriptOptions()
 
 
-colorscheme atom-dark
+colorscheme atom-dark-256
 
 
 " ctrlp: regex to ignore directories
 let g:ctrlp_custom_ignore = 'node_modules\|git'
+
+
+
+
+" PYTHON
+
+" flake8
+" https://github.com/nvie/vim-flake8
+let g:flake8_show_quickfix=1
+let g:flake8_show_in_gutter=1
+let g:flake8_show_in_file=1
+let g:flake8_cmd="flake8"
+autocmd BufWritePost *.py call Flake8() "runs flake 8 on save
