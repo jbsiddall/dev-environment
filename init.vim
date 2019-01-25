@@ -66,8 +66,7 @@ colorscheme atom-dark-256
 " ctrlp: regex to ignore directories
 let g:ctrlp_custom_ignore = 'node_modules\|git'
 
-
-
+let NERDTreeIgnore = ['\.pyc$']
 
 " PYTHON
 
@@ -77,4 +76,4 @@ let g:flake8_show_quickfix=1
 let g:flake8_show_in_gutter=1
 let g:flake8_show_in_file=1
 let g:flake8_cmd="flake8"
-autocmd BufWritePost *.py call Flake8() "runs flake 8 on save
+" autocmd BufWritePost *.py call Flake8() "runs flake 8 on save
