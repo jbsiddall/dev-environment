@@ -2,9 +2,12 @@ call plug#begin()
 Plug 'https://github.com/scrooloose/nerdtree'
 Plug 'https://github.com/gosukiwi/vim-atom-dark'
 Plug 'https://github.com/kien/ctrlp.vim'
-Plug 'nvie/vim-flake8'
+Plug 'itchyny/lightline.vim'  " pretty status line
+Plug 'airblade/vim-gitgutter'  " shows git line changes in gutter
+Plug 'w0rp/ale'  " run async commands like flake8 etc and show errors
 Plug 'rbgrouleff/bclose.vim'
-Plug 'francoiscabrol/ranger.vim'
+Plug 'https://github.com/plasticboy/vim-markdown'
+    Plug 'godlygeek/tabular'  " dependency on vim-markdown
 call plug#end()
 
 let mapleader=" "
@@ -70,10 +73,13 @@ let NERDTreeIgnore = ['\.pyc$']
 
 " PYTHON
 
-" flake8
-" https://github.com/nvie/vim-flake8
-let g:flake8_show_quickfix=1
-let g:flake8_show_in_gutter=1
-let g:flake8_show_in_file=1
-let g:flake8_cmd="flake8"
-" autocmd BufWritePost *.py call Flake8() "runs flake 8 on save
+" disable markdown folding
+let g:vim_markdown_folding_disabled = 1
+
+
+" ale
+let g:ale_completion_enabled = 1
+let g:ale_linters_explicit = 1
+let g:ale_linters = {
+\   'python': ['flake8', 'mypy'],
+\}
