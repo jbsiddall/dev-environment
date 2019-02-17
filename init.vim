@@ -37,7 +37,9 @@ filetype plugin indent on
 set colorcolumn=120
 set nu
 let g:ctrlp_working_path_mode = 'w'
-let g:ctrlp_use_caching = 0
+let g:ctrlp_use_caching = 1
+let g:ctrlp_clear_cache_on_exit = 1
+let g:ctrlp_custom_ignore = 'node_modules\|git\|venv\|.*.pyc'
 
 autocmd BufReadPre,FileReadPre * :set rnu
 
@@ -65,9 +67,6 @@ endfunction
 
 colorscheme atom-dark-256
 
-
-" ctrlp: regex to ignore directories
-let g:ctrlp_custom_ignore = 'node_modules\|git'
 
 let NERDTreeIgnore = ['\.pyc$']
 
