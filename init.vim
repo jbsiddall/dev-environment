@@ -1,4 +1,5 @@
 call plug#begin()
+Plug 'tpope/vim-fugitive'
 Plug 'https://github.com/scrooloose/nerdtree'
 Plug 'https://github.com/gosukiwi/vim-atom-dark'
 Plug 'https://github.com/kien/ctrlp.vim'
@@ -8,6 +9,7 @@ Plug 'w0rp/ale'  " run async commands like flake8 etc and show errors
 Plug 'rbgrouleff/bclose.vim'
 Plug 'https://github.com/plasticboy/vim-markdown'
     Plug 'godlygeek/tabular'  " dependency on vim-markdown
+Plug 'posva/vim-vue'
 call plug#end()
 
 let mapleader=" "
@@ -48,22 +50,6 @@ set shiftwidth=4
 set shiftround
 set tabstop=4
 set expandtab
-
-:autocmd FileType html call SetHtmlOptions()
-
-function! SetHtmlOptions()
-    set shiftwidth=2
-    set tabstop=2
-endfunction
-
-function! SetJavascriptOptions()
-    set shiftwidth=4
-    set tabstop=4
-    set expandtab
-endfunction
-
-:autocmd FileType javascript call SetJavascriptOptions()
-
 
 colorscheme atom-dark-256
 
