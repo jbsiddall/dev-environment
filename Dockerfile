@@ -15,8 +15,6 @@ COPY ./sudoers /etc/sudoers
 USER dev
 WORKDIR /home/dev
 RUN mkdir -p /home/dev/.config/nvim
-RUN git config --global user.email "you@example.com"
-  git config --global user.name "Your Name"
 
 RUN git clone https://aur.archlinux.org/nvim-packer-git.git && cd nvim-packer-git && makepkg -si --noconfirm
 
