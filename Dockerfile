@@ -2,10 +2,8 @@ FROM archlinux as dev
 RUN pacman -Syy
 RUN pacman --noconfirm -Su
 RUN useradd -ms /bin/bash newuser
-RUN pacman -Sy --noconfirm neovim git base-devel
-RUN pacman -Sy --noconfirm sudo
-RUN pacman -Sy --noconfirm openssh
-RUN pacman -Sy --noconfirm zsh
+RUN pacman -Sy --noconfirm neovim git base-devel sudo openssh zsh \
+    ripgrep fd # needed for nvim telescope
 
 RUN echo 'root:helloroot' | chpasswd
 RUN useradd -m dev
@@ -20,7 +18,7 @@ WORKDIR /home/dev
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 RUN mkdir -p /home/dev/.config/nvim
 
-RUN git clone https://aur.archlinux.org/nvim-packer-git.git && cd nvim-packer-git && makepkg -si --noconfirm
+# RUN git clone https://aur.archlinux.org/nvim-packer-git.git && cd nvim-packer-git && makepkg -si --noconfirm
 
 
 FROM dev as typescript-dev

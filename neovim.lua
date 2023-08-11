@@ -1,5 +1,16 @@
--- equivalent of call plug#begin()
---
+local ensure_packer = function()
+  local fn = vim.fn
+  local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+  if fn.empty(fn.glob(install_path)) > 0 then
+    fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+    vim.cmd [[packadd packer.nvim]]
+    return true
+  end
+  return false
+end
+
+local was_packer_installed = ensure_packer()
+
 vim.cmd [[packadd packer.nvim]]
 
 require('packer').startup(function(use)
@@ -18,7 +29,15 @@ require('packer').startup(function(use)
   use {
     'nvim-telescope/telescope.nvim',
     tag = '0.1.2',
-    requires = { {'nvim-lua/plenary.nvim'} }
+    requires = { 'nvim-lua/plenary.nvim', 'nvim-treesitter/nvim-treesitter' },
+    config = function()
+        local builtin = require('telescope.builtin')
+        vim.keymap.set('n', '<C-p>', builtin.find_files, {})
+        vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
+        vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+        vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
+        vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+    end
   }
 
   use {
@@ -80,20 +99,10 @@ require('packer').startup(function(use)
       end,
   }
 
-  use {
-    'https://github.com/kien/ctrlp.vim',
-    config = function()
-        vim.g.ctrlp_working_path_mode = 'rc'
-        vim.g.ctrlp_use_caching = 1
-        vim.g.ctrlp_clear_cache_on_exit = 1
-        vim.g.ctrlp_show_hidden = 1
-        vim.g.ctrlp_custom_ignore = 'node_modules\\|git\\|venv\\|.*.pyc'
-    end,
-  }
-
   use 'itchyny/lightline.vim'  -- pretty status line
   use 'airblade/vim-gitgutter'  -- shows git line changes in gutter
   use 'rbgrouleff/bclose.vim'
+
 end)
 
 local AU_GROUP = "siddall-nvim-config"
@@ -160,3 +169,9 @@ vim.api.nvim_create_autocmd({"BufWritePost"}, {
         packer.sync()
     end,
 })
+
+if was_packer_installed then
+    require('packer').sync()
+end
+
+vim.cmd('badd ' .. "~/.config/nvim/init.lua")
