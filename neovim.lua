@@ -1,3 +1,6 @@
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 local ensure_packer = function()
   local fn = vim.fn
   local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
@@ -17,6 +20,15 @@ require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
 
   use {
+    "ahmedkhalf/project.nvim",
+    requires = {'nvim-telescope/telescope.nvim'},
+    config = function()
+        require("project_nvim").setup { }
+        require('telescope').load_extension('projects')
+    end
+  }
+
+  use {
     "folke/which-key.nvim",
     config = function()
     vim.o.timeout = true
@@ -32,11 +44,18 @@ require('packer').startup(function(use)
     requires = { 'nvim-lua/plenary.nvim', 'nvim-treesitter/nvim-treesitter' },
     config = function()
         local builtin = require('telescope.builtin')
-        vim.keymap.set('n', '<C-p>', builtin.find_files, {})
         vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
         vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
         vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
         vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+    end
+  }
+
+  use {
+    "nvim-telescope/telescope-file-browser.nvim",
+    requires = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
+    config = function()
+        require('telescope').load_extension('file_browser')
     end
   }
 
@@ -64,24 +83,135 @@ require('packer').startup(function(use)
   }
 
   use {
+      'rcarriga/nvim-notify',
+      config = function()
+          vim.opt.termguicolors = true
+          local notify = require'notify'
+          notify.setup {}
+          vim.notify = function(message, level, opts)
+              return notify(message, level, opts) -- <-- Important to return the value from `nvim-notify`
+          end
+      end
+  }
+  use {
+      'dmmulroy/tsc.nvim',
+      ft = 'typescript',
+      after = 'nvim-notify',
+      requires = {'nvim-notify'},
+      config = function()
+          require('tsc').setup {
+              auto_open_qflist = false,
+          }
+      end
+  }
+  use {
+    'mrded/nvim-lsp-notify',
+    after = {'nvim-notify'},
+    config = function()
+        require('lsp-notify').setup {
+            -- notify = require'notify'
+        }
+    end
+  }
+
+  use {
+    'mfussenegger/nvim-lsp-compl',
+    requires = {'neovim/nvim-lspconfig'},
+    after = 'nvim-lspconfig',
+    config = function()
+        local lspconfig = require('lspconfig')
+        local autocomplete = require('lsp_compl')
+        lspconfig.tsserver.setup {
+            --on_attach = autocomplete.attach
+            on_attach = function(client, bufnr)
+                vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+            end
+        }
+    end
+  }
+
+  use {
       'neovim/nvim-lspconfig',
       opt = true,
+      after = 'nvim-lsp-notify',
       ft = {'typescript'},
       config = function()
-        local lspconfig = require('lspconfig')
-        lspconfig.tsserver.setup {}
+
+        vim.keymap.set('n', '<space>e', vim.diagnostic.open_float)
+        vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
+        vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
+        vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist)
+
+        -- Use LspAttach autocommand to only map the following keys
+        -- after the language server attaches to the current buffer
+        vim.api.nvim_create_autocmd('LspAttach', {
+            group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+            callback = function(ev)
+                -- Enable completion triggered by <c-x><c-o>
+                vim.api.nvim_buf_set_option(ev.buf, "omnifunc", "v:lua.vim.lsp.omnifunc")
+                -- vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
+
+                -- Buffer local mappings.
+                -- See `:help vim.lsp.*` for documentation on any of the below functions
+                local opts = { buffer = ev.buf }
+                vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+                vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+                vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+                vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+                vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+                vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
+                vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, opts)
+                vim.keymap.set('n', '<space>wl', function()
+                    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+                end, opts)
+                vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
+                vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+                vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
+                -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+                vim.keymap.set('n', 'gr', require'telescope.builtin'.lsp_references, opts)
+                vim.keymap.set('n', '<space>f', function()
+                    vim.lsp.buf.format { async = true }
+                end, opts)
+            end,
+        })
+        
       end,
   }
   use 'tpope/vim-fugitive'
   use {
-      'https://github.com/scrooloose/nerdtree',
-      config = function()
-        vim.g.NERDTreeIgnore = {
-            [[\.pyc$]],
-            "node_modules$",
+    'nvim-tree/nvim-tree.lua',
+    requires = {
+        'nvim-tree/nvim-web-devicons', -- optional
+    },
+    config = function()
+        require'nvim-tree'.setup {
+            update_cwd = true,
+            open_on_setup = true,
+            open_on_setup_file = true,
+
+            diagnostics = {
+                enable = true
+            },
+            modified = {
+                enable = true,
+            },
+            filters = {
+                dotfiles = false,
+                git_ignored = false,
+            },
         }
-      end,
+    end,
   }
+  
+  -- use {
+  --     'https://github.com/scrooloose/nerdtree',
+  --     config = function()
+  --       vim.g.NERDTreeIgnore = {
+  --           [[\.pyc$]],
+  --           "node_modules$",
+  --       }
+  --     end,
+  -- }
 
   use {
       "https://github.com/folke/tokyonight.nvim",
@@ -103,8 +233,10 @@ require('packer').startup(function(use)
   use 'airblade/vim-gitgutter'  -- shows git line changes in gutter
   use 'rbgrouleff/bclose.vim'
 
+
 end)
 
+vim.g.mapleader = " "
 local AU_GROUP = "siddall-nvim-config"
 vim.api.nvim_create_augroup(AU_GROUP, {})
 
@@ -155,15 +287,12 @@ vim.opt.tabstop = 4
 vim.opt.expandtab = true
 vim.g.editorconfig = true
 
+local VIM_CONFIG_PATH = "/home/dev/.config/nvim/init.lua"
 
 vim.api.nvim_create_autocmd({"BufWritePost"}, {
-    pattern = {"init.lua"},
+    pattern = {VIM_CONFIG_PATH},
     group = AU_GROUP,
     callback = function(ctx)
-        if ctx.file ~= "/home/dev/.config/nvim/init.lua" then
-	    print('sad', ctx.file)
-            return
-	end
         vim.api.nvim_command("source " .. ctx.file)
         local packer = require('packer')
         packer.sync()
@@ -174,4 +303,4 @@ if was_packer_installed then
     require('packer').sync()
 end
 
-vim.cmd('badd ' .. "~/.config/nvim/init.lua")
+vim.cmd('badd ' .. VIM_CONFIG_PATH)
