@@ -1,5 +1,10 @@
+-- for nvim-tree
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
+
+-- ABSOLUTELY IMPORTANT
+-- this means any drop downs don't auto select the first item
+vim.o.completeopt="menuone,noinsert,noselect"
 
 local ensure_packer = function()
   local fn = vim.fn
@@ -18,6 +23,15 @@ vim.cmd [[packadd packer.nvim]]
 
 require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
+
+  use {
+      'David-Kunz/jester', -- jest runner for typescript
+      config = function()
+          require'jester'.setup {
+              cmd = "pnpm test -t '$result' -- $file"
+          }
+      end
+  }
 
   use {
     "ahmedkhalf/project.nvim",
@@ -83,7 +97,7 @@ require('packer').startup(function(use)
   }
 
   use {
-      'rcarriga/nvim-notify',
+      'jbsiddall/nvim-notify',
       config = function()
           vim.opt.termguicolors = true
           local notify = require'notify'
@@ -122,9 +136,17 @@ require('packer').startup(function(use)
         local lspconfig = require('lspconfig')
         local autocomplete = require('lsp_compl')
         lspconfig.tsserver.setup {
-            --on_attach = autocomplete.attach
+            capabilities = vim.tbl_deep_extend(
+                'force',
+                vim.lsp.protocol.make_client_capabilities(),
+                autocomplete.capabilities()
+            ),
             on_attach = function(client, bufnr)
                 vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+                autocomplete.attach(client, bufnr,  {
+                    server_side_fuzzy_completion = false 
+                })
+
             end
         }
     end
@@ -148,7 +170,7 @@ require('packer').startup(function(use)
             group = vim.api.nvim_create_augroup('UserLspConfig', {}),
             callback = function(ev)
                 -- Enable completion triggered by <c-x><c-o>
-                vim.api.nvim_buf_set_option(ev.buf, "omnifunc", "v:lua.vim.lsp.omnifunc")
+                -- vim.api.nvim_buf_set_option(ev.buf, "omnifunc", "v:lua.vim.lsp.omnifunc")
                 -- vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
 
                 -- Buffer local mappings.

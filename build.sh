@@ -1,1 +1,1 @@
-docker build -t dev-environment .
+docker build --target=typescript-dev -t dev-environment .

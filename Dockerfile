@@ -20,8 +20,13 @@ RUN mkdir -p /home/dev/.config/nvim
 
 # RUN git clone https://aur.archlinux.org/nvim-packer-git.git && cd nvim-packer-git && makepkg -si --noconfirm
 
+FROM dev as vscode-dev
+RUN \
+	git clone https://aur.archlinux.org/code-server.git && \
+	cd code-server && \
+	makepkg -si --noconfirm
 
 FROM dev as typescript-dev
-RUN sudo pacman -Sy --noconfirm nodejs
+RUN sudo pacman -Sy --noconfirm nodejs npm deno
 RUN sudo corepack enable
 RUN sudo yarn global add typescript typescript-language-server

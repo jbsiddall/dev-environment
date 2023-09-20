@@ -6,4 +6,7 @@ docker run -it --rm \
     --mount type=bind,source=${HOME}/.gitconfig,destination=/home/dev/.gitconfig,readonly \
     --mount type=bind,source=${HOME}/Projects,destination=/home/dev/Projects \
     --mount type=volume,source=pnpm-store,destination=/pnpm-store \
+    --mount type=bind,source=${SCRIPT_DIR}/vscode-server-config.yaml,destination=/home/dev/.config/code-server/config.yaml \
+    --publish=8080:8080 --expose=8080 \
+    --name=dev-environment \
     dev-environment zsh
